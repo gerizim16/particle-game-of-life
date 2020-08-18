@@ -43,12 +43,13 @@ function game(sketch) {
                 const collisionRadius = (this.radius + other.radius);
                 if (dist >= this.behaviorParams.maxRadius) return;
 
-                if (dist < collisionRadius) {
-                    this.velocity.add(toOther.setMag(-Math.abs(2 * this.behaviorParams.peak * (Math.tanh(dist - collisionRadius) - 1))));
-                }
-                if (dist >= this.behaviorParams.minRadius) {
-                    this.velocity.add(toOther.setMag(this.behaviorParams.polarity * other.behaviorParams.polarity * this.behaviorParams.peak * Math.sin(Math.PI * (dist - collisionRadius) / (this.behaviorParams.maxRadius - collisionRadius))));
-                }
+                // if (dist < collisionRadius) {
+                this.velocity.add(toOther.setMag(-Math.abs(2 * this.behaviorParams.peak * (Math.tanh(dist - collisionRadius) - 1))));
+                // }
+                this.velocity.add(toOther.setMag(this.behaviorParams.polarity * other.behaviorParams.polarity * this.behaviorParams.peak / (Math.pow(this.behaviorParams.maxRadius, 2) / Math.pow(dist, 2))));
+                // if (dist >= this.behaviorParams.minRadius) {
+                //     this.velocity.add(toOther.setMag(this.behaviorParams.polarity * other.behaviorParams.polarity * this.behaviorParams.peak * Math.sin(Math.PI * (dist - this.behaviorParams.minRadius) / (this.behaviorParams.maxRadius - this.behaviorParams.minRadius))));
+                // }
             };
         }
 
@@ -107,13 +108,13 @@ function game(sketch) {
         Particle.COLOR[i] = [getRandomInt(0, 255), getRandomInt(0, 255), getRandomInt(0, 255)];
         Particle.RADIUS[i] = getRandomInt(4, 8);
         const minRadius = getRandomInt(Particle.RADIUS[i], Particle.RADIUS[i] * 1.5);
-        const maxRadius = getRandomInt(minRadius + 10, minRadius * 3 + 30);
+        const maxRadius = getRandomInt(minRadius + 10, minRadius * 4 + 10);
         const polarity = i % 2 ? -1 : 1;
 
         Particle.BEHAVIOR_PARAMETERS[i] = {
             minRadius: minRadius,
             maxRadius: maxRadius,
-            peak: Math.random() * 2 - 1,
+            peak: (Math.random() + 1) / 2 * (Math.random() < 0.5 ? -1 : 1),
             polarity: polarity,
         }
     }
