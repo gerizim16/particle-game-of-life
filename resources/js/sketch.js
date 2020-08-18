@@ -1,3 +1,13 @@
+function getRandomInt(min, max) {
+    if (max == null) {
+        max = min;
+        min = 0;
+    }
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min)) + min;
+}
+
 function game(sketch) {
     const COLORS = {
         darkGreen: [38, 70, 83],
@@ -17,28 +27,29 @@ function game(sketch) {
             this.radius = Particle.RADIUS[this.type];
             this.velocity = sketch.createVector(0, 0);
 
-            const behaviorParams = Particle.BEHAVIOR_PARAMETERS[this.type];
+            this.behaviorParams = Particle.BEHAVIOR_PARAMETERS[this.type];
             this.applyForceFrom = function (other) {
                 if (this == other) return;
                 const toOther = p5.Vector.sub(other.position, this.position);
                 const dist = toOther.mag();
-                const collisionRadius = this.radius + other.radius;
-                if (dist >= behaviorParams.maxRadius) return;
+                const collisionRadius = 1.5 * (this.radius + other.radius);
+                if (dist >= this.behaviorParams.maxRadius) return;
 
                 if (dist < collisionRadius) {
-                    this.velocity.add(toOther.setMag(1 / collisionRadius - 1 / dist));
-                } else if (dist >= behaviorParams.minRadius) {
-                    this.velocity.add(toOther.setMag(behaviorParams.peak * Math.sin(Math.PI * (dist - collisionRadius) / (behaviorParams.maxRadius - collisionRadius))));
+                    this.velocity.add(toOther.setMag(-Math.abs(2 * this.behaviorParams.peak * (Math.tanh(dist - collisionRadius) - 1))));
+                }
+                if (dist >= this.behaviorParams.minRadius) {
+                    this.velocity.add(toOther.setMag(this.behaviorParams.polarity * other.behaviorParams.polarity * this.behaviorParams.peak * Math.sin(Math.PI * (dist - collisionRadius) / (this.behaviorParams.maxRadius - collisionRadius))));
                 }
             };
         }
 
         update() {
             this.velocity.setMag(Math.min(Particle.MAXVEL, this.velocity.mag()));
-            this.position.add(p5.Vector.mult(this.velocity, sketch.deltaTime));
+            this.position.add(p5.Vector.mult(this.velocity, sketch.deltaTime / 100));
             this.friction();
-            this.bound();
-            // this.edgeLoop();
+            // this.bound();
+            this.edgeLoop();
         }
 
         updateBehavior() {
@@ -49,7 +60,7 @@ function game(sketch) {
 
         friction() {
             const velMag = this.velocity.mag();
-            this.velocity.setMag(Math.max(0, velMag - velMag * 0.0005 * sketch.deltaTime));
+            this.velocity.setMag(Math.max(0, velMag - velMag * 0.1 * sketch.deltaTime / 100));
         }
 
         bound() {
@@ -75,69 +86,29 @@ function game(sketch) {
         }
     }
 
-    Particle.MAXVEL = 1;
+    Particle.MAXVEL = Infinity;
 
-    Particle.NTYPES = 6;
+    Particle.NTYPES = 20;
+    Particle.TYPE = {};
+    Particle.COLOR = {};
+    Particle.RADIUS = {};
+    Particle.BEHAVIOR_PARAMETERS = {};
 
-    Particle.TYPE = Object.freeze({
-        red: 0,
-        yellow: 1,
-        green: 2,
-        blue: 3,
-        white: 4,
-        orange: 5,
-    });
+    for (let i = 0; i < Particle.NTYPES; i++) {
+        Particle.TYPE[i] = i;
+        Particle.COLOR[i] = [getRandomInt(0, 255), getRandomInt(0, 255), getRandomInt(0, 255)];
+        Particle.RADIUS[i] = getRandomInt(4, 8);
+        const minRadius = getRandomInt(Particle.RADIUS[i], Particle.RADIUS[i] * 3);
+        const maxRadius = getRandomInt(minRadius + 10, (minRadius + 10) * 3);
+        const polarity = getRandomInt(1) ? -1 : 1;
 
-    Particle.COLOR = Object.freeze({
-        [Particle.TYPE.red]: COLORS.red,
-        [Particle.TYPE.yellow]: COLORS.yellow,
-        [Particle.TYPE.green]: COLORS.darkGreen,
-        [Particle.TYPE.blue]: COLORS.bluegreen,
-        [Particle.TYPE.white]: COLORS.white,
-        [Particle.TYPE.orange]: COLORS.orange,
-    });
-
-    Particle.RADIUS = Object.freeze({
-        [Particle.TYPE.red]: 5,
-        [Particle.TYPE.yellow]: 8,
-        [Particle.TYPE.green]: 5,
-        [Particle.TYPE.blue]: 5,
-        [Particle.TYPE.white]: 7,
-        [Particle.TYPE.orange]: 6,
-    });
-
-    Particle.BEHAVIOR_PARAMETERS = Object.freeze({
-        [Particle.TYPE.red]: {
-            minRadius: 25,
-            maxRadius: 50,
-            peak: 0.0008,
-        },
-        [Particle.TYPE.yellow]: {
-            minRadius: 20,
-            maxRadius: 60,
-            peak: 0.0007,
-        },
-        [Particle.TYPE.green]: {
-            minRadius: 10,
-            maxRadius: 40,
-            peak: -0.0004,
-        },
-        [Particle.TYPE.blue]: {
-            minRadius: 5,
-            maxRadius: 20,
-            peak: 0,
-        },
-        [Particle.TYPE.white]: {
-            minRadius: 15,
-            maxRadius: 90,
-            peak: 0.0005,
-        },
-        [Particle.TYPE.orange]: {
-            minRadius: 40,
-            maxRadius: 80,
-            peak: 0.0006,
-        },
-    });
+        Particle.BEHAVIOR_PARAMETERS[i] = {
+            minRadius: minRadius,
+            maxRadius: maxRadius,
+            peak: Math.random() * 2 - 1,
+            polarity: polarity,
+        }
+    }
 
     let particles = [];
 
@@ -149,7 +120,7 @@ function game(sketch) {
         canvas.style('display', 'block');
         // sketch.frameRate(30);
 
-        for (let i = 0; i < sketch.width * sketch.height / 4000; i++) {
+        for (let i = 0; i < sketch.width * sketch.height / 2000; i++) {
             particles.push(new Particle([getRandomInt(sketch.width), getRandomInt(sketch.height)], particles));
         }
     };
