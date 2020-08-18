@@ -40,7 +40,7 @@ function game(sketch) {
                 if (this == other) return;
                 const toOther = p5.Vector.sub(other.position, this.position);
                 const dist = toOther.mag();
-                const collisionRadius = 1.5 * (this.radius + other.radius);
+                const collisionRadius = (this.radius + other.radius);
                 if (dist >= this.behaviorParams.maxRadius) return;
 
                 if (dist < collisionRadius) {
