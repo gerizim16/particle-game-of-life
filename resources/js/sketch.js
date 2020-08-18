@@ -18,6 +18,14 @@ function game(sketch) {
         white: [220, 220, 220],
     }
 
+    function sliderChanged(slider) {
+        if (slider.oldValue != slider.value()) {
+            slider.oldValue = slider.value();
+            return true;
+        }
+        return false;
+    }
+
     class Particle {
         constructor(position, others, type) {
             this.position = sketch.createVector(...position);
@@ -110,7 +118,16 @@ function game(sketch) {
         }
     }
 
-    let particles = [];
+    let particles;
+    let diversity, diversitySlider;
+
+    function reset() {
+        diversity = diversitySlider.value();
+        particles = [];
+        for (let i = 0; i < sketch.width * sketch.height / 2000; i++) {
+            particles.push(new Particle([getRandomInt(sketch.width), getRandomInt(sketch.height)], particles, getRandomInt(diversity)));
+        }
+    }
 
     sketch.preload = function () {
     };
@@ -119,13 +136,20 @@ function game(sketch) {
         let canvas = sketch.createCanvas(sketch.windowWidth, sketch.windowHeight);
         canvas.style('display', 'block');
         // sketch.frameRate(30);
+        sketch.textSize(20);
 
-        for (let i = 0; i < sketch.width * sketch.height / 2000; i++) {
-            particles.push(new Particle([getRandomInt(sketch.width), getRandomInt(sketch.height)], particles));
-        }
+        diversitySlider = sketch.createSlider(1, Particle.NTYPES, 6, 1);
+        diversitySlider.position(20, 20);
+        diversitySlider.style('width', '200px');
+
+        reset();
     };
 
     sketch.draw = function () {
+        if (sliderChanged(diversitySlider)) {
+            reset();
+        }
+
         sketch.background(0);
 
         particles.forEach(element => {
@@ -136,6 +160,11 @@ function game(sketch) {
             element.update();
             element.draw();
         });
+
+        sketch.stroke(COLORS.white);
+        sketch.strokeWeight(4);
+        sketch.textAlign(sketch.LEFT);
+        sketch.text('diversity', 240, 37);
     };
 
     sketch.mouseMoved = function () {
