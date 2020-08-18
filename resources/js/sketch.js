@@ -105,10 +105,10 @@ function game(sketch) {
     for (let i = 0; i < Particle.NTYPES; i++) {
         Particle.TYPE[i] = i;
         Particle.COLOR[i] = [getRandomInt(0, 255), getRandomInt(0, 255), getRandomInt(0, 255)];
-        Particle.RADIUS[i] = getRandomInt(5, 8);
-        const minRadius = getRandomInt(Particle.RADIUS[i], Particle.RADIUS[i] * 2);
-        const maxRadius = getRandomInt(minRadius + 10, minRadius * 3 + 10);
-        const polarity = getRandomInt(1) ? -1 : 1;
+        Particle.RADIUS[i] = getRandomInt(4, 8);
+        const minRadius = getRandomInt(Particle.RADIUS[i], Particle.RADIUS[i] * 1.5);
+        const maxRadius = getRandomInt(minRadius + 10, minRadius * 3 + 30);
+        const polarity = i % 2 ? -1 : 1;
 
         Particle.BEHAVIOR_PARAMETERS[i] = {
             minRadius: minRadius,
