@@ -56,8 +56,8 @@ function game(sketch) {
             this.velocity.setMag(Math.min(Particle.MAXVEL, this.velocity.mag()));
             this.position.add(p5.Vector.mult(this.velocity, sketch.deltaTime / 100));
             this.friction();
-            // this.bound();
-            this.edgeLoop();
+            this.bound();
+            // this.edgeLoop();
         }
 
         updateBehavior() {
@@ -105,9 +105,9 @@ function game(sketch) {
     for (let i = 0; i < Particle.NTYPES; i++) {
         Particle.TYPE[i] = i;
         Particle.COLOR[i] = [getRandomInt(0, 255), getRandomInt(0, 255), getRandomInt(0, 255)];
-        Particle.RADIUS[i] = getRandomInt(4, 8);
-        const minRadius = getRandomInt(Particle.RADIUS[i], Particle.RADIUS[i] * 3);
-        const maxRadius = getRandomInt(minRadius + 10, (minRadius + 10) * 3);
+        Particle.RADIUS[i] = getRandomInt(5, 8);
+        const minRadius = getRandomInt(Particle.RADIUS[i], Particle.RADIUS[i] * 2);
+        const maxRadius = getRandomInt(minRadius + 10, minRadius * 3 + 10);
         const polarity = getRandomInt(1) ? -1 : 1;
 
         Particle.BEHAVIOR_PARAMETERS[i] = {
