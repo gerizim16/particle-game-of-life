@@ -152,7 +152,7 @@ function game(sketch) {
         diversitySlider.position(20, 20);
         diversitySlider.style('width', '200px');
 
-        dampSlider = sketch.createSlider(0, 0.99, 0.3, 0.01);
+        dampSlider = sketch.createSlider(0, 0.99, 0.6, 0.01);
         dampSlider.position(20, 50);
         dampSlider.style('width', '200px');
 
