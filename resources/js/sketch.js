@@ -61,7 +61,7 @@ function game(sketch) {
             // this.edgeLoop();
         }
 
-        updateBehavior() {
+        calculateBehavior() {
             for (const other of this.others) {
                 this.applyForceFrom(other);
             }
@@ -104,26 +104,30 @@ function game(sketch) {
     Particle.RADIUS = {};
     Particle.BEHAVIOR_PARAMETERS = {};
 
-    for (let i = 0; i < Particle.NTYPES; i++) {
-        Particle.TYPE[i] = i;
-        Particle.COLOR[i] = [getRandomInt(0, 255), getRandomInt(0, 255), getRandomInt(0, 255)];
-        Particle.RADIUS[i] = getRandomInt(4, 8);
-        const minRadius = getRandomInt(Particle.RADIUS[i], Particle.RADIUS[i] * 1.5);
-        const maxRadius = getRandomInt(minRadius + 10, minRadius * 4 + 10);
-        const polarity = i % 2 ? -1 : 1;
+    function generateParticleBehaviors() {
+        for (let i = 0; i < Particle.NTYPES; i++) {
+            Particle.TYPE[i] = i;
+            Particle.COLOR[i] = [getRandomInt(0, 255), getRandomInt(0, 255), getRandomInt(0, 255)];
+            Particle.RADIUS[i] = getRandomInt(4, 8);
+            const minRadius = getRandomInt(Particle.RADIUS[i], Particle.RADIUS[i] * 1.5);
+            const maxRadius = getRandomInt(minRadius + 10, minRadius * 4 + 10);
+            const polarity = i % 2 ? -1 : 1;
 
-        Particle.BEHAVIOR_PARAMETERS[i] = {
-            minRadius: minRadius,
-            maxRadius: maxRadius,
-            peak: (Math.random() + 1) / 2 * (Math.random() < 0.5 ? -1 : 1),
-            polarity: polarity,
+            Particle.BEHAVIOR_PARAMETERS[i] = {
+                minRadius: minRadius,
+                maxRadius: maxRadius,
+                peak: (Math.random() + 1) / 2 * (Math.random() < 0.5 ? -1 : 1),
+                polarity: polarity,
+            }
         }
     }
 
     let particles;
     let diversity, diversitySlider;
+    let generateButton;
 
     function reset() {
+        generateParticleBehaviors();
         diversity = diversitySlider.value();
         particles = [];
         for (let i = 0; i < sketch.width * sketch.height / 2000; i++) {
@@ -148,10 +152,18 @@ function game(sketch) {
         dampSlider.position(20, 50);
         dampSlider.style('width', '200px');
 
+        generateButton = sketch.createButton('regenerate behaviors');
+        generateButton.position(20, 80);
+        generateButton.mousePressed(reset);
+
         reset();
     };
 
     sketch.draw = function () {
+        if (!sketch.focused) {
+            sketch.deltaTime = 0;
+            return;
+        }
         if (sliderChanged(diversitySlider)) {
             reset();
         }
@@ -162,10 +174,7 @@ function game(sketch) {
         sketch.background(0);
 
         particles.forEach(element => {
-            element.updateBehavior();
-        });
-
-        particles.forEach(element => {
+            element.calculateBehavior();
             element.update();
             element.draw();
         });
