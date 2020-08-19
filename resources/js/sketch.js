@@ -116,7 +116,7 @@ function game(sketch) {
             Particle.BEHAVIOR_PARAMETERS[i] = {
                 minRadius: minRadius,
                 maxRadius: maxRadius,
-                peak: (Math.random() + 1) / 2 * (Math.random() < 0.5 ? -1 : 1),
+                peak: (Math.random() + 1) / 2 * (Math.floor(i / 2) % 2 ? -1 : 1),
                 polarity: polarity,
             }
         }
@@ -128,6 +128,10 @@ function game(sketch) {
 
     function reset() {
         generateParticleBehaviors();
+        repopulate();
+    }
+
+    function repopulate() {
         diversity = diversitySlider.value();
         particles = [];
         for (let i = 0; i < sketch.width * sketch.height / 2000; i++) {
@@ -144,11 +148,11 @@ function game(sketch) {
         // sketch.frameRate(30);
         sketch.textSize(20);
 
-        diversitySlider = sketch.createSlider(1, Particle.NTYPES, 6, 1);
+        diversitySlider = sketch.createSlider(1, Particle.NTYPES, 8, 1);
         diversitySlider.position(20, 20);
         diversitySlider.style('width', '200px');
 
-        dampSlider = sketch.createSlider(0, 0.99, 0.1, 0.01);
+        dampSlider = sketch.createSlider(0, 0.99, 0.3, 0.01);
         dampSlider.position(20, 50);
         dampSlider.style('width', '200px');
 
@@ -165,7 +169,7 @@ function game(sketch) {
             return;
         }
         if (sliderChanged(diversitySlider)) {
-            reset();
+            repopulate();
         }
         if (sliderChanged(dampSlider)) {
             Particle.DAMPCOEFF = dampSlider.value();
