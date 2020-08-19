@@ -54,10 +54,10 @@ function game(sketch) {
         }
 
         update() {
+            this.bound();
             this.velocity.setMag(Math.min(Particle.MAXVEL, this.velocity.mag()));
             this.position.add(p5.Vector.mult(this.velocity, sketch.deltaTime / 100));
             this.damp(Particle.DAMPCOEFF);
-            this.bound();
             // this.edgeLoop();
         }
 
