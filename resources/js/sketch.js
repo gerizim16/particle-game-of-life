@@ -46,17 +46,17 @@ function game(sketch) {
                 // if (dist < collisionRadius) {
                 this.velocity.add(toOther.setMag(-Math.abs(2 * this.behaviorParams.peak * (Math.tanh(dist - collisionRadius) - 1))));
                 // }
-                this.velocity.add(toOther.setMag(this.behaviorParams.polarity * other.behaviorParams.polarity * this.behaviorParams.peak / (Math.pow(this.behaviorParams.maxRadius, 2) / Math.pow(dist, 2))));
-                // if (dist >= this.behaviorParams.minRadius) {
-                //     this.velocity.add(toOther.setMag(this.behaviorParams.polarity * other.behaviorParams.polarity * this.behaviorParams.peak * Math.sin(Math.PI * (dist - this.behaviorParams.minRadius) / (this.behaviorParams.maxRadius - this.behaviorParams.minRadius))));
-                // }
+                // this.velocity.add(toOther.setMag(this.behaviorParams.polarity * other.behaviorParams.polarity * this.behaviorParams.peak / (Math.pow(collisionRadius, 2) / Math.pow(dist, 2))));
+                if (dist >= this.behaviorParams.minRadius) {
+                    this.velocity.add(toOther.setMag(this.behaviorParams.polarity * other.behaviorParams.polarity * this.behaviorParams.peak * Math.sin(Math.PI * (dist - this.behaviorParams.minRadius) / (this.behaviorParams.maxRadius - this.behaviorParams.minRadius))));
+                }
             };
         }
 
         update() {
             this.velocity.setMag(Math.min(Particle.MAXVEL, this.velocity.mag()));
             this.position.add(p5.Vector.mult(this.velocity, sketch.deltaTime / 100));
-            this.friction();
+            this.damp(Particle.DAMPCOEFF);
             this.bound();
             // this.edgeLoop();
         }
@@ -67,9 +67,9 @@ function game(sketch) {
             }
         }
 
-        friction() {
+        damp(coeff) {
             const velMag = this.velocity.mag();
-            this.velocity.setMag(Math.max(0, velMag - velMag * 0.1 * sketch.deltaTime / 100));
+            this.velocity.setMag(Math.max(0, velMag * (1 - coeff * sketch.deltaTime / 100)));
         }
 
         bound() {
@@ -96,6 +96,7 @@ function game(sketch) {
     }
 
     Particle.MAXVEL = Infinity;
+    Particle.DAMPCOEFF = 0.1;
 
     Particle.NTYPES = 20;
     Particle.TYPE = {};
@@ -143,12 +144,19 @@ function game(sketch) {
         diversitySlider.position(20, 20);
         diversitySlider.style('width', '200px');
 
+        dampSlider = sketch.createSlider(0, 0.99, 0.1, 0.01);
+        dampSlider.position(20, 50);
+        dampSlider.style('width', '200px');
+
         reset();
     };
 
     sketch.draw = function () {
         if (sliderChanged(diversitySlider)) {
             reset();
+        }
+        if (sliderChanged(dampSlider)) {
+            Particle.DAMPCOEFF = dampSlider.value();
         }
 
         sketch.background(0);
@@ -166,6 +174,7 @@ function game(sketch) {
         sketch.strokeWeight(4);
         sketch.textAlign(sketch.LEFT);
         sketch.text('diversity', 240, 37);
+        sketch.text('damping', 240, 67);
     };
 
     sketch.mouseMoved = function () {
