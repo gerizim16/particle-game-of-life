@@ -148,7 +148,7 @@ function game(sketch) {
         // sketch.frameRate(30);
         sketch.textSize(20);
 
-        diversitySlider = sketch.createSlider(1, Particle.NTYPES, 8, 1);
+        diversitySlider = sketch.createSlider(1, Particle.NTYPES, 4, 1);
         diversitySlider.position(20, 20);
         diversitySlider.style('width', '200px');
 
